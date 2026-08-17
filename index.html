@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Chapter 20 — Varshini</title>
+
+<!-- ============================================================
+     GOOGLE FONTS
+     - "Cormorant Garamond": elegant serif for body/subheads
+     - "Italiana": refined display serif for big statements
+     - "Playwrite HU": warm handwritten script for signature lines
+============================================================= -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Italiana&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Meddon&display=swap" rel="stylesheet">
+
+<style>
+/* ================================================================
+   DESIGN TOKENS
+   Palette:
+     --cream:    #FBF3EA   base canvas
+     --peach:    #F6C9AE   warm accent
+     --pink:     #E8A0BF   primary accent
+     --lavender: #B9A6D9   secondary accent
+     --plum:     #3B1F3E   deep ink / night sky
+     --gold:     #D9A94E   metallic accent, used sparingly
+   Type:
+     Display: "Italiana"  (statements, the number 20, HAPPY BIRTHDAY)
+     Body:    "Cormorant Garamond" (everything readable)
+     Script:  "Meddon" (signature / handwritten warmth, used ONCE per scene max)
+   Signature element: the candle + breath-detection flame, and the
+   "chapter" numerals that thread through the whole site like a
+   book's table of contents rather than a generic progress bar.
+================================================================= */
+:root{
+  --cream:#FBF3EA;
+  --cream-2:#F3E6D8;
+  --peach:#F6C9AE;
+  --pink:#E8A0BF;
+  --pink-deep:#D6749F;
+  --lavender:#B9A6D9;
+  --lavender-deep:#8E76BE;
+  --plum:#2E1735;
+  --plum-2:#3F2149;
+  --plum-3:#4E2A5C;
+  --gold:#D9A94E;
+  --gold-soft:#EAD3A0;
+  --ink:#3A2740;
+  --font-display:'Italiana', serif;
+  --font-body:'Cormorant Garamond', serif;
+  --font-script:'Meddon', cursive;
+}
+
+*{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+html,body{
+  width:100%; overflow-x:hidden; background:var(--plum); color:var(--cream);
+  font-family:var(--font-body); scroll-behavior:smooth;
+}
+body{ min-height:100vh; }
+
+::selection{ background:var(--pink); color:var(--plum); }
+
+button{ font-family:var(--font-body); cursor:pointer; border:none; background:none; color:inherit; }
+a{ color:inherit; }
+
+/* focus visibility */
+button:focus-visible, .tap-target:focus-visible{
+  outline:2px solid var(--gold-soft);
+  outline-offset:3px;
+}
+
+/* generic scene wrapper */
+.scene{
+  position:relative;
+  width:100%;
+  min-height:100vh;
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:8vh 6vw;
+  text-align:center;
+  overflow:hidden;
+}
+.hidden{ display:none !important; }
+
+/* chapter marker — appears top-left on every scene, echoes book/chapter theme */
+.chapter-mark{
+  position:absolute;
+  top:22px; left:26px;
+  font-family:var(--font-display);
+  letter-spacing:.14em;
+  font-size:.72rem;
+  color:var(--gold-soft);
+  opacity:.75;
+  text-transform:uppercase;
+  z-index:5;
+}
+
+/* ================= BACKDROPS ================= */
+.bg-dreamy{
+  background:
+    radial-gradient(circle at 20% 20%, rgba(232,160,191,.18), transparent 55%),
+    radial-gradient(circle at 80% 75%, rgba(185,166,217,.22), transparent 55%),
+    linear-gradient(180deg, #1c0f22 0%, var(--plum) 45%, var(--plum-3) 100%);
+}
+.bg-soft{
+  background:
+    radial-gradient(circle at 15% 15%, rgba(246,201,174,.35), transparent 50%),
+    radial-gradient(circle at 85% 20%, rgba(232,160,191,.30), transparent 50%),
+    radial-gradient(circle at 50% 100%, rgba(185,166,217,.28), transparent 55%),
+    linear-gradient(180deg, var(--cream) 0%, var(--cream-2) 100%);
+  color:var(--ink);
+}
+.bg-warm{
+  background:
+    radial-gradient(circle at 30% 20%, rgba(217,169,78,.25), transparent 55%),
+    radial-gradient(circle at 75% 80%, rgba(232,160,191,.30), transparent 55%),
+    linear-gradient(160deg, var(--plum-2) 0%, var(--plum) 70%);
+}
+.bg-night{
+  background:
+    radial-gradient(circle at 50% 120%, rgba(232,160,191,.15), transparent 60%),
+    linear-gradient(180deg, #150a1a 0%, var(--plum) 60%, #1a0d20 100%);
+}
+
+/* floating particle canvas layers (hearts/stars/sparkles) */
+.particle-layer{
+  position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:1;
+}
+.particle{
+  position:absolute; bottom:-10%; opacity:0;
+  animation:floatUp linear forwards;
+  will-change:transform, opacity;
+}
+@keyframes floatUp{
+  0%{ transform:translateY(0) translateX(0) rotate(0deg) scale(.7); opacity:0; }
+  10%{ opacity:.9; }
+  90%{ opacity:.7; }
+  100%{ transform:translateY(-115vh) translateX(var(--drift,20px)) rotate(360deg) scale(1); opacity:0; }
+}
+
+/* content card */
+.content{
+  position:relative; z-index:3;
+  max-width:640px; width:100%;
+  display:flex; flex-direction:column; align-items:center; gap:22px;
+}
+
+/* typography helpers */
+.eyebrow{
+  font-family:var(--font-display);
+  letter-spacing:.32em;
+  text-transform:uppercase;
+  font-size:.68rem;
+  color:var(--gold-soft);
+  opacity:.85;
+}
+.line{
+  font-family:var(--font-body);
+  font-weight:500;
+  font-size:clamp(1.25rem, 4.4vw, 1.9rem);
+  line-height:1.5;
+  opacity:0;
+  transform:translateY(14px);
+}
+.line.script{
+  font-family:var(--font-script);
+  font-size:clamp(1.6rem, 6vw, 2.4rem);
+  color:var(--gold-soft);
+}
+.reveal-in{
+  animation:revealIn 1s cubic-bezier(.2,.8,.2,1) forwards;
+}
+@keyframes revealIn{
+  to{ opacity:1; transform:translateY(0); }
+}
+
+.display-huge{
+  font-family:var(--font-display);
+  font-size:clamp(2.6rem, 11vw, 6rem);
+  line-height:1.05;
+  letter-spacing:.02em;
+  background:linear-gradient(120deg, var(--gold-soft), var(--pink) 45%, var(--lavender) 85%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  filter:drop-shadow(0 0 30px rgba(217,169,78,.35));
+}
+
+/* buttons */
+.btn{
+  position:relative;
+  display:inline-flex; align-items:center; gap:10px;
+  padding:16px 34px;
+  border-radius:999px;
+  font-family:var(--font-display);
+  font-size:.85rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  background:linear-gradient(120deg, var(--pink), var(--lavender-deep));
+  color:#fff;
+  box-shadow:0 10px 30px -8px rgba(214,116,159,.55);
+  transition:transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s;
+  min-height:52px;
+  touch-action:manipulation;
+}
+.btn:hover{ transform:translateY(-3px); box-shadow:0 16px 34px -6px rgba(214,116,159,.6); }
+.btn:active{ transform:translateY(0) scale(.97); }
+.btn.gold{
+  background:linear-gradient(120deg, var(--gold), var(--gold-soft));
+  color:var(--plum);
+  box-shadow:0 10px 30px -8px rgba(217,169,78,.55);
+}
+.btn.ghost{
+  background:transparent;
+  color:var(--ink);
+  border:1.5px solid rgba(58,39,64,.3);
+  box-shadow:none;
+}
+
+/* glassmorphism card */
+.glass-card{
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.18);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  border-radius:22px;
+  padding:26px 24px;
+  box-shadow:0 20px 40px -20px rgba(0,0,0,.4);
+}
+.bg-soft .glass-card{
+  background:rgba(255,255,255,.55);
+  border:1px solid rgba(255,255,255,.7);
+  color:var(--ink);
+}
+
+/* music toggle */
+#musicToggle{
+  position:fixed; bottom:20px; right:20px; z-index:50;
+  width:52px; height:52px; border-radius:50%;
+  background:rgba(46,23,53,.55);
+  border:1px solid rgba(255,255,255,.25);
+  backdrop-filter:blur(10px);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--gold-soft);
+  font-size:1.2rem;
+  opacity:0; pointer-events:none;
+  transition:opacity .6s ease, transform .3s;
+}
+#musicToggle.show{ opacity:1; pointer-events:auto; }
+#musicToggle:active{ transform:scale(.92); }
+#musicToggle .bar{
+  width:3px; height:10px; margin:0 1.5px; background:var(--gold-soft); border-radius:2px; display:inline-block;
+  animation:eq 1s ease-in-out infinite;
+}
+#musicToggle.playing .bar:nth-child(1){ animation-delay:0s; }
+#musicToggle.playing .bar:nth-child(2){ animation-delay:.2s; }
+#musicToggle.playing .bar:nth-child(3){ animation-delay:.4s; }
+#musicToggle:not(.playing) .bar{ animation-play-state:paused; height:4px; }
+@keyframes eq{ 0%,100%{ height:6px; } 50%{ height:16px; } }
+
+/* progress dots (chapter navigation feel, not generic numbered steps —
+   these mirror a book's spine, only visible after the story begins) */
+#spine{
+  position:fixed; left:14px; top:50%; transform:translateY(-50%);
+  z-index:40; display:flex; flex-direction:column; gap:9px;
+  opacity:0; pointer-events:none; transition:opacity .6s;
+}
+#spine.show{ opacity:.55; }
+#spine .tick{ width:4px; height:16px; border-radius:2px; background:var(--cream); opacity:.35; }
+#spine .tick.active{ opacity:1; background:var(--gold-soft); height:26px; }
+
+@media (max-width:640px){
+  #spine{ display:none; }
+  .scene{ padding:7vh 6vw; }
+}
+
+/* ============ SCENE 1 : WELCOME ============ */
+#scene1 .content{ gap:20px; }
+
+/* ============ SCENE 2 : MINI GAME ============ */
+.game-field{
+  position:relative; width:100%; max-width:520px; height:52vh; min-height:340px;
+  margin-top:6px;
+}
+.catchable{
+  position:absolute; font-size:2.1rem; line-height:1;
+  filter:drop-shadow(0 4px 14px rgba(232,160,191,.5));
+  animation:bob 2.6s ease-in-out infinite;
+  touch-action:manipulation;
+  background:none; border:none; padding:10px;
+}
+@keyframes bob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-10px); } }
+.counter{
+  font-family:var(--font-display); font-size:1.6rem; letter-spacing:.08em; color:var(--gold-soft);
+}
+.pop-particle{
+  position:absolute; pointer-events:none; font-size:1rem;
+  animation:popOut .7s ease-out forwards;
+}
+@keyframes popOut{
+  0%{ transform:translate(0,0) scale(1); opacity:1; }
+  100%{ transform:translate(var(--px), var(--py)) scale(.3); opacity:0; }
+}
+
+/* twinkling star field, layered behind particle emitters on night scenes */
+.twinkle-field{ position:absolute; inset:0; z-index:0; pointer-events:none; }
+.twinkle{
+  position:absolute; border-radius:50%; background:#fff;
+  box-shadow:0 0 6px 1px rgba(255,255,255,.8);
+  animation:twinkle ease-in-out infinite;
+}
+@keyframes twinkle{ 0%,100%{ opacity:.25; transform:scale(.8); } 50%{ opacity:1; transform:scale(1.3); } }
+
+/* ============ SCENE 3 : CAKE ============ */
+.cake-glow{
+  position:absolute; left:50%; top:56%; transform:translate(-50%,-50%);
+  width:min(90vw,360px); height:min(90vw,360px); border-radius:50%;
+  background:radial-gradient(circle, rgba(232,160,191,.35), rgba(185,166,217,.18) 45%, transparent 70%);
+  filter:blur(6px); z-index:0; pointer-events:none;
+  animation:glowPulse 3.4s ease-in-out infinite;
+}
+@keyframes glowPulse{ 0%,100%{ opacity:.7; } 50%{ opacity:1; } }
+.cake-wrap{
+  position:relative; width:min(78vw, 300px); margin:18px auto 8px; z-index:2;
+}
+.cake{
+  position:relative; width:100%;
+}
+.plate{
+  width:100%; height:14px; border-radius:50%;
+  background:radial-gradient(ellipse at center, rgba(217,169,78,.55), rgba(217,169,78,0) 70%);
+  margin-top:-6px;
+}
+.tier{
+  position:relative; margin:0 auto; border-radius:14px 14px 10px 10px;
+  box-shadow: inset 0 -10px 18px rgba(0,0,0,.15), 0 14px 20px -10px rgba(0,0,0,.4);
+}
+.tier.bottom{
+  width:100%; height:78px;
+  background:linear-gradient(180deg, var(--peach), var(--pink) 90%);
+}
+.tier.top{
+  width:70%; height:58px;
+  background:linear-gradient(180deg, #fff7ee, var(--peach) 95%);
+  margin-top:-6px;
+}
+.drip{
+  position:absolute; top:-8px; left:0; right:0; height:20px;
+  background:
+    radial-gradient(circle at 8% 0, var(--gold-soft) 0 7px, transparent 8px),
+    radial-gradient(circle at 26% 0, var(--gold-soft) 0 6px, transparent 7px),
+    radial-gradient(circle at 46% 0, var(--gold-soft) 0 8px, transparent 9px),
+    radial-gradient(circle at 66% 0, var(--gold-soft) 0 6px, transparent 7px),
+    radial-gradient(circle at 86% 0, var(--gold-soft) 0 7px, transparent 8px);
+}
+.candle{
+  position:absolute; top:-64px; left:50%; transform:translateX(-50%);
+  width:12px; height:64px; border-radius:5px;
+  background:repeating-linear-gradient(180deg, var(--gold), var(--gold) 8px, var(--gold-soft) 8px, var(--gold-soft) 16px);
+  box-shadow:0 4px 10px rgba(0,0,0,.3);
+}
+.wick{ position:absolute; top:-8px; left:50%; transform:translateX(-50%); width:2px; height:8px; background:#3a2a1a; }
+.flame{
+  position:absolute; top:-34px; left:50%; transform:translateX(-50%);
+  width:16px; height:26px; border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;
+  background:radial-gradient(circle at 50% 70%, #fff8d8 0%, var(--gold) 35%, #ff8a4c 70%, transparent 75%);
+  box-shadow:0 0 18px 6px rgba(255,170,60,.55), 0 0 40px 12px rgba(255,140,60,.25);
+  transform-origin:50% 90%;
+  animation:flicker 1.1s ease-in-out infinite;
+}
+@keyframes flicker{
+  0%,100%{ transform:translateX(-50%) rotate(-2deg) scale(1); }
+  25%{ transform:translateX(-50%) rotate(3deg) scale(1.05); }
+  50%{ transform:translateX(-50%) rotate(-3deg) scale(.96); }
+  75%{ transform:translateX(-50%) rotate(2deg) scale(1.03); }
+}
+/* STEP 1 — blow detected: flame grows and flickers rapidly */
+.flame.blow-start{
+  animation:flickerFast .18s ease-in-out infinite;
+}
+@keyframes flickerFast{
+  0%,100%{ transform:translateX(-50%) rotate(-6deg) scale(1.15); }
+  50%{ transform:translateX(-50%) rotate(6deg) scale(1.3); }
+}
+/* STEP 2 — flame bends hard sideways under the breath */
+.flame.blow-bend{
+  animation:flameBend .5s ease-in forwards;
+}
+@keyframes flameBend{
+  0%{ transform:translateX(-50%) rotate(0deg) scaleX(1) scaleY(1); opacity:1; }
+  100%{ transform:translateX(-50%) translateX(9px) rotate(72deg) scaleX(.55) scaleY(.8); opacity:.85; }
+}
+/* STEP 3 + 4 — flame shrinks then fully disappears */
+.flame.blow-out{
+  animation:flameShrink .6s ease-in forwards;
+}
+@keyframes flameShrink{
+  0%{ transform:translateX(-50%) translateX(9px) rotate(60deg) scale(.6); opacity:.85; }
+  60%{ transform:translateX(-50%) translateX(4px) rotate(30deg) scale(.25); opacity:.5; }
+  100%{ transform:translateX(-50%) translateX(0) rotate(0deg) scale(0); opacity:0; }
+}
+/* STEP 5 — a tiny glowing ember lingers on the wick tip, then fades */
+.ember{
+  position:absolute; top:-9px; left:50%; transform:translateX(-50%);
+  width:5px; height:5px; border-radius:50%;
+  background:radial-gradient(circle, #ffdca0 0%, #ff8a4c 60%, transparent 80%);
+  box-shadow:0 0 8px 3px rgba(255,140,70,.6);
+  opacity:0;
+  animation:emberGlow 1.1s ease-out forwards;
+}
+@keyframes emberGlow{
+  0%{ opacity:0; transform:translateX(-50%) scale(.4); }
+  20%{ opacity:1; transform:translateX(-50%) scale(1); }
+  100%{ opacity:0; transform:translateX(-50%) scale(.5); }
+}
+.smoke{
+  position:absolute; top:-40px; left:50%; width:6px; height:6px; border-radius:50%;
+  background:rgba(220,220,220,.55); filter:blur(2px);
+  animation:smokeRise 2.2s ease-out forwards;
+}
+@keyframes smokeRise{
+  0%{ opacity:.7; transform:translate(-50%,0) scale(1); }
+  100%{ opacity:0; transform:translate(calc(-50% + var(--sx,10px)), -70px) scale(3); }
+}
+.wick.charred{ background:#1c130c; box-shadow:0 0 4px rgba(0,0,0,.5); }
+.age-number{
+  font-family:var(--font-display); font-size:clamp(3.2rem, 15vw, 5.5rem);
+  color:var(--gold-soft); text-shadow:0 0 30px rgba(217,169,78,.4);
+  line-height:1;
+}
+.mic-meter{
+  width:180px; height:6px; border-radius:4px; background:rgba(255,255,255,.15);
+  overflow:hidden; margin:6px auto 0;
+}
+.mic-meter-fill{
+  height:100%; width:0%; background:linear-gradient(90deg, var(--pink), var(--gold)); transition:width .08s linear;
+}
+
+/* ============ SCENE 4 : REVEAL ============ */
+.countdown-num{
+  font-family:var(--font-display); font-size:clamp(4rem, 22vw, 9rem);
+  color:var(--gold-soft); text-shadow:0 0 40px rgba(217,169,78,.5);
+}
+.confetti-piece, .firework, .balloon{ position:absolute; pointer-events:none; }
+.confetti-piece{
+  width:9px; height:14px; top:-5%;
+  animation:confettiFall linear forwards;
+}
+@keyframes confettiFall{
+  0%{ transform:translateY(0) rotate(0deg); opacity:1; }
+  100%{ transform:translateY(112vh) rotate(720deg); opacity:.9; }
+}
+.balloon{
+  bottom:-20%; width:46px; height:58px; border-radius:50% 50% 50% 50% / 55% 55% 45% 45%;
+  animation:balloonRise linear forwards;
+}
+.balloon::after{
+  content:''; position:absolute; left:50%; bottom:-38px; width:1px; height:40px;
+  background:rgba(255,255,255,.4); transform:translateX(-50%);
+}
+@keyframes balloonRise{
+  0%{ transform:translateY(0) translateX(0); opacity:0; }
+  8%{ opacity:.95; }
+  100%{ transform:translateY(-125vh) translateX(var(--sway, 30px)); opacity:.85; }
+}
+.firework{
+  width:5px; height:5px; border-radius:50%;
+  box-shadow:0 0 0 0 currentColor;
+  animation:fireworkPop 1.4s ease-out forwards;
+}
+@keyframes fireworkPop{
+  0%{ box-shadow:0 0 0 0 currentColor; opacity:1;}
+  100%{ box-shadow:
+      0 -60px 0 -1px currentColor, 42px -42px 0 -1px currentColor, 60px 0 0 -1px currentColor,
+      42px 42px 0 -1px currentColor, 0 60px 0 -1px currentColor, -42px 42px 0 -1px currentColor,
+      -60px 0 0 -1px currentColor, -42px -42px 0 -1px currentColor;
+    opacity:0;
+  }
+}
+
+/* ============ SCENE 5 : QUOTE CARDS ============ */
+.quote-stage{ width:100%; max-width:560px; min-height:220px; position:relative; }
+.quote-card{
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  padding:34px 30px; text-align:center;
+  font-family:var(--font-body); font-style:italic; font-weight:500;
+  font-size:clamp(1.15rem, 4vw, 1.55rem);
+  opacity:0; transform:translateY(24px) scale(.97);
+  transition:opacity .7s ease, transform .7s ease;
+  pointer-events:none;
+}
+.quote-card.active{ opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
+.quote-dots{ display:flex; gap:7px; margin-top:14px; }
+.quote-dots span{ width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.3); }
+.bg-soft .quote-dots span{ background:rgba(58,39,64,.25); }
+.quote-dots span.active{ background:var(--gold-soft); width:18px; border-radius:4px; transition:width .3s; }
+
+/* ============ SCENE 6 : MEMORIES — hanging polaroid scrapbook ============ */
+.string-line{
+  width:min(92vw,560px); height:2px; margin:6px auto 0;
+  background:linear-gradient(90deg, transparent, rgba(234,211,160,.6) 8%, rgba(234,211,160,.6) 92%, transparent);
+}
+.polaroid-grid{
+  width:100%; max-width:600px; margin-top:6px;
+  display:grid; grid-template-columns:repeat(3, 1fr); gap:14px 10px;
+}
+@media (max-width:520px){
+  .polaroid-grid{ grid-template-columns:repeat(2, 1fr); gap:20px 14px; }
+}
+.polaroid{
+  position:relative; background:#fffdf8; padding:10px 10px 30px;
+  border-radius:3px; box-shadow:0 14px 24px -10px rgba(0,0,0,.45), 0 2px 4px rgba(0,0,0,.2);
+  transform:rotate(var(--rot, -3deg));
+  animation:polaroidFloat 5s ease-in-out infinite;
+  animation-delay:var(--fdelay, 0s);
+  cursor:pointer;
+  opacity:0; transition:opacity .6s ease;
+}
+.polaroid.in{ opacity:1; }
+@keyframes polaroidFloat{
+  0%,100%{ transform:rotate(var(--rot,-3deg)) translateY(0); }
+  50%{ transform:rotate(var(--rot,-3deg)) translateY(-6px); }
+}
+.polaroid .clip{
+  position:absolute; top:-9px; left:50%; transform:translateX(-50%) rotate(-8deg);
+  width:16px; height:16px; border-radius:3px;
+  background:linear-gradient(135deg, var(--gold-soft), var(--gold));
+  box-shadow:0 3px 5px rgba(0,0,0,.35);
+}
+.polaroid .photo{
+  width:100%; aspect-ratio:1/1; object-fit:cover; display:block;
+  background:linear-gradient(135deg, var(--peach), var(--pink) 60%, var(--lavender));
+  border-radius:1px;
+}
+.polaroid .photo.placeholder{
+  display:flex; align-items:center; justify-content:center;
+  color:rgba(58,39,64,.5); font-family:var(--font-display); font-size:.65rem; letter-spacing:.06em;
+  text-align:center; padding:6px;
+}
+.polaroid .cap{
+  position:absolute; bottom:6px; left:0; right:0; text-align:center;
+  font-family:var(--font-script); font-size:.85rem; color:var(--ink); opacity:.85;
+  padding:0 6px; line-height:1.1;
+}
+
+/* fullscreen lightbox for tapped photos */
+#lightbox{
+  position:fixed; inset:0; z-index:200; background:rgba(20,10,24,.92);
+  display:flex; align-items:center; justify-content:center; flex-direction:column; gap:16px;
+  padding:24px; opacity:0; pointer-events:none; transition:opacity .35s ease;
+}
+#lightbox.show{ opacity:1; pointer-events:auto; }
+#lightbox img{
+  max-width:min(88vw,480px); max-height:60vh; border-radius:6px;
+  box-shadow:0 30px 60px -20px rgba(0,0,0,.6); background:linear-gradient(135deg, var(--peach), var(--pink));
+}
+#lightbox .lb-cap{ font-family:var(--font-script); font-size:1.4rem; color:var(--gold-soft); text-align:center; }
+#lightbox .lb-close{
+  position:absolute; top:20px; right:20px; width:44px; height:44px; border-radius:50%;
+  background:rgba(255,255,255,.12); color:#fff; font-size:1.3rem; display:flex; align-items:center; justify-content:center;
+}
+
+/* ============ SCENE 7 : QUIZ ============ */
+.quiz-card{ width:100%; max-width:520px; }
+.quiz-q{ font-size:clamp(1.2rem,4vw,1.5rem); margin-bottom:16px; font-weight:500; }
+.quiz-options{ display:flex; flex-direction:column; gap:12px; }
+.quiz-opt{
+  padding:14px 18px; border-radius:14px; text-align:left; font-size:1.05rem;
+  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18);
+  transition:background .25s, transform .2s, border-color .25s;
+  min-height:48px;
+}
+.bg-soft .quiz-opt{ background:rgba(255,255,255,.55); border-color:rgba(58,39,64,.15); }
+.quiz-opt:active{ transform:scale(.98); }
+.quiz-opt.chosen{ background:linear-gradient(120deg, var(--pink), var(--lavender-deep)); color:#fff; border-color:transparent; }
+.quiz-progress{ display:flex; gap:6px; margin-bottom:18px; }
+.quiz-progress i{ width:26px; height:4px; border-radius:3px; background:rgba(255,255,255,.2); }
+.bg-soft .quiz-progress i{ background:rgba(58,39,64,.15); }
+.quiz-progress i.done{ background:var(--gold-soft); }
+
+/* ============ SCENE 8 : LETTER ============ */
+.letter-card{
+  max-width:560px; text-align:left; font-size:clamp(1.05rem, 3.4vw, 1.3rem);
+  line-height:1.85;
+}
+.letter-card p{ margin-bottom:16px; }
+.letter-sign{ font-family:var(--font-script); font-size:1.8rem; color:var(--gold-soft); margin-top:10px; }
+
+/* ============ FINAL SCREEN ============ */
+.stars-static{ position:absolute; inset:0; z-index:0; }
+.star-dot{ position:absolute; width:2px; height:2px; background:#fff; border-radius:50%; opacity:.7; }
+
+/* skip-link removed elements for reduced motion users */
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     GLOBAL: chapter spine + music toggle (persist across scenes)
+============================================================= -->
+<div id="spine"></div>
+<button id="musicToggle" aria-label="Toggle background music">
+  <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+</button>
+
+<!-- ===== EDIT BACKGROUND MUSIC HERE =====
+     Put your track at music/birthday.mp3 next to this index.html file
+     (see folder structure in the notes below). If no file is found there,
+     the music button simply stays hidden and the site still works fine. -->
+<audio id="bgMusic" loop preload="none">
+  <source src="music/birthday.mp3" type="audio/mpeg">
+</audio>
+
+<!-- ============================================================
+     SCENE 1 — THE SECRET WELCOME
+============================================================= -->
+<section class="scene bg-dreamy" id="scene1">
+  <div class="twinkle-field" id="tw1"></div>
+  <div class="particle-layer" id="p1"></div>
+  <div class="chapter-mark">Chapter 01 · The Invitation</div>
+  <div class="content">
+    <p class="eyebrow line" id="s1l0">a little something, just for you</p>
+    <p class="line" id="s1l1" style="font-family:var(--font-display); font-size:clamp(1.8rem,6vw,2.6rem);">Hey Varshini&hellip;</p>
+    <p class="line" id="s1l2">Someone made a little something for you.</p>
+    <p class="line script" id="s1l3">But there's a tiny rule&hellip;</p>
+    <p class="line" id="s1l4" style="font-weight:600;">Don't skip anything.</p>
+    <button class="btn line" id="s1btn">Enter Your Birthday World →</button>
+  </div>
+</section>
+
+<!-- ============================================================
+     SCENE 2 — PERSONAL INTERACTION (mini game)
+============================================================= -->
+<section class="scene bg-warm hidden" id="scene2">
+  <div class="particle-layer" id="p2"></div>
+  <div class="chapter-mark">Chapter 02 · A Small Test</div>
+  <div class="content">
+    <p class="eyebrow">before we begin</p>
+    <p class="line reveal-in" style="font-size:clamp(1.3rem,4.5vw,1.9rem);">Let's see if the birthday girl is actually ready to turn 20.</p>
+    <p class="line reveal-in" style="animation-delay:.15s;">Catch 5 hearts to unlock your birthday surprise.</p>
+    <div class="counter" id="gameCounter">0 / 5</div>
+  </div>
+  <div class="game-field" id="gameField"></div>
+  <div id="s2unlock" class="content hidden" style="margin-top:10px;">
+    <p class="line script reveal-in">Okayyy&hellip; you're officially ready.</p>
+    <button class="btn gold reveal-in" id="s2btn" style="animation-delay:.2s;">Unlock My Birthday →</button>
+  </div>
+</section>
+
+<!-- ============================================================
+     SCENE 3 — THE BIRTHDAY CAKE
+============================================================= -->
+<section class="scene bg-warm hidden" id="scene3">
+  <div class="twinkle-field" id="tw3"></div>
+  <div class="cake-glow"></div>
+  <div class="particle-layer" id="p3"></div>
+  <div class="chapter-mark">Chapter 03 · Make a Wish</div>
+  <div class="content">
+    <p class="line reveal-in script">Wait&hellip;</p>
+    <p class="line reveal-in" style="animation-delay:.15s;">There's one thing <em>you</em> have to do.</p>
+    <p class="line reveal-in" style="animation-delay:.3s; font-weight:600;">Make a wish first.</p>
+
+    <div class="age-number reveal-in" style="animation-delay:.45s;">20</div>
+
+    <div class="cake-wrap reveal-in" style="animation-delay:.6s;">
+      <div class="cake">
+        <div class="candle" id="candle">
+          <div class="wick" id="wickEl"></div>
+          <div class="flame" id="flame"></div>
+        </div>
+        <div class="tier top"><div class="drip"></div></div>
+        <div class="tier bottom"></div>
+      </div>
+      <div class="plate"></div>
+    </div>
+
+    <p class="line reveal-in" style="animation-delay:.75s; font-size:1.1rem;">Your mission:</p>
+    <p class="line reveal-in" style="animation-delay:.85s; font-weight:600;">Blow out the candle.</p>
+
+    <div class="mic-meter reveal-in" style="animation-delay:1s;"><div class="mic-meter-fill" id="micFill"></div></div>
+    <p class="line reveal-in" id="micInstruction" style="animation-delay:1.05s; font-size:.95rem; opacity:.85 !important;">
+      Allow microphone access and blow toward the candle.
+    </p>
+
+    <button class="btn ghost reveal-in" id="fallbackBlow" style="animation-delay:1.15s;">Tap to blow the candle</button>
+  </div>
+</section>
+
+<!-- ============================================================
+     SCENE 4 — THE BIG REVEAL
+============================================================= -->
+<section class="scene bg-night hidden" id="scene4">
+  <div class="twinkle-field" id="tw4"></div>
+  <div class="particle-layer" id="p4"></div>
+  <div class="chapter-mark">Chapter 04 · The Reveal</div>
+  <div class="content" id="countdownWrap">
+    <div class="countdown-num" id="countdownNum">3</div>
+  </div>
+  <div class="content hidden" id="revealWrap">
+    <p class="display-huge" id="revealTitle">HAPPY 20TH BIRTHDAY</p>
+    <p class="line script reveal-in" style="animation-delay:.3s; font-size:clamp(1.8rem,7vw,2.6rem);">Varshini S</p>
+    <p class="line reveal-in" style="animation-delay:.6s;">Welcome to Chapter 20.</p>
+    <button class="btn gold line reveal-in" id="s4btn" style="animation-delay:.9s;">Okay&hellip; what else is there?</button>
+  </div>
+</section>
+
+<!-- ============================================================
+     SCENE 5 — "HOPE YOUR 20 FEELS LIKE..."
+============================================================= -->
+<section class="scene bg-soft hidden" id="scene5">
+  <div class="chapter-mark" style="color:var(--pink-deep); opacity:.8;">Chapter 05 · Wishes</div>
+  <div class="content">
+    <p class="eyebrow" style="color:var(--pink-deep);">a few wishes</p>
+    <h2 style="font-family:var(--font-display); font-size:clamp(1.7rem,6vw,2.6rem); color:var(--ink);">Hope Your 20 Feels Like&hellip;</h2>
+
+    <div class="quote-stage" id="quoteStage"></div>
+    <div class="quote-dots" id="quoteDots"></div>
+
+    <button class="btn" id="s5btn" style="margin-top:10px;">Continue →</button>
+  </div>
+</section>
+
+<!-- ============================================================
+     SCENE 6 — BEST FRIEND SECTION
+============================================================= -->
+<section class="scene bg-dreamy hidden" id="scene6">
+  <div class="twinkle-field" id="tw6"></div>
+  <div class="particle-layer" id="p6"></div>
+  <div class="chapter-mark">Chapter 06 · Us</div>
+  <div class="content">
+    <p class="line script reveal-in">And somewhere inside all those memories&hellip;</p>
+    <p class="line reveal-in" style="animation-delay:.2s; font-weight:600;">I'm really glad you're my best friend.</p>
+
+    <div class="string-line"></div>
+    <div class="polaroid-grid" id="polaroidGrid"></div>
+
+    <button class="btn" id="s6btn" style="margin-top:14px;">Continue →</button>
+  </div>
+</section>
+
+<!-- fullscreen photo viewer, opened by tapping any polaroid -->
+<div id="lightbox">
+  <button class="lb-close" id="lbClose" aria-label="Close photo">×</button>
+  <img id="lbImg" src="" alt="">
+  <p class="lb-cap" id="lbCap"></p>
+</div>
+
+<!-- ============================================================
+     SCENE 7 — LITTLE GAME / SURPRISE (quiz)
+============================================================= -->
+<section class="scene bg-warm hidden" id="scene7">
+  <div class="chapter-mark">Chapter 07 · One Last Question</div>
+  <div class="content">
+    <p class="eyebrow">one last question</p>
+    <p class="line reveal-in" style="font-size:clamp(1.3rem,4.5vw,1.8rem);">How well do you know your best friend?</p>
+
+    <div class="quiz-card glass-card">
+      <div class="quiz-progress" id="quizProgress"></div>
+      <div id="quizBody"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SCENE 8 — FINAL LETTER
+============================================================= -->
+<section class="scene bg-soft hidden" id="scene8">
+  <div class="chapter-mark" style="color:var(--pink-deep); opacity:.8;">Chapter 08 · The Letter</div>
+  <div class="content">
+    <p class="eyebrow" style="color:var(--pink-deep);">to varshini</p>
+    <h2 style="font-family:var(--font-display); font-size:clamp(1.8rem,6vw,2.6rem); color:var(--ink);">To Varshini&hellip;</h2>
+
+    <!-- ===== EDIT THE FINAL BIRTHDAY MESSAGE HERE ===== -->
+    <div class="letter-card glass-card" style="color:var(--ink);">
+      <p>20 is not just another number. It's the beginning of so many new things.</p>
+      <p>There will be days when everything feels perfect, and days when you have absolutely no idea what you're doing.</p>
+      <p>But I hope through all of it, you remember this: you are capable of becoming someone you're proud of.</p>
+      <p>Thank you for being one of those people who makes ordinary days feel a little more special.</p>
+      <p>I hope this year gives you memories you'll talk about years from now.</p>
+      <p>Happy 20th birthday, Varshini. Here's to Chapter 20.</p>
+    </div>
+    <!-- ===== END FINAL MESSAGE ===== -->
+
+    <button class="btn" id="s8btn" style="margin-top:6px;">Continue →</button>
+  </div>
+</section>
+
+<!-- ============================================================
+     FINAL SCREEN
+============================================================= -->
+<section class="scene bg-night hidden" id="scene9">
+  <div class="stars-static" id="starsStatic"></div>
+  <div class="particle-layer" id="p9"></div>
+  <div class="chapter-mark">Chapter 09 · Onward</div>
+  <div class="content">
+    <p class="line reveal-in script" style="font-size:clamp(1.7rem,6vw,2.3rem);">Chapter 20 begins now.</p>
+    <p class="line reveal-in" style="animation-delay:.25s;">Make it unforgettable.</p>
+    <p class="display-huge reveal-in" style="animation-delay:.5s; font-size:clamp(1.9rem,7vw,3rem);">Happy Birthday, Varshini S.</p>
+    <p class="line reveal-in" style="animation-delay:.85s; margin-top:10px;">With lots of love,</p>
+    <p class="letter-sign reveal-in" style="animation-delay:1.05s;">Your Best Friend</p>
+    <button class="btn reveal-in" id="replayBtn" style="animation-delay:1.3s;">Replay the Magic</button>
+  </div>
+</section>
+
+<script>
+/* ================================================================
+   UTILITIES
+================================================================= */
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+const scenes = ['scene1','scene2','scene3','scene4','scene5','scene6','scene7','scene8','scene9'];
+
+function goToScene(id){
+  scenes.forEach(s => $('#'+s).classList.add('hidden'));
+  const target = $('#'+id);
+  target.classList.remove('hidden');
+  window.scrollTo({top:0, behavior:'instant' in window ? 'instant' : 'auto'});
+  updateSpine(id);
+  runSceneEnter(id);
+}
+
+function updateSpine(id){
+  const spine = $('#spine');
+  if(scenes.indexOf(id) === 0){ spine.classList.remove('show'); return; }
+  spine.classList.add('show');
+  spine.innerHTML = scenes.map(s => `<div class="tick ${s===id?'active':''}"></div>`).join('');
+}
+
+/* Staggered line reveal for a scene (adds reveal-in with incremental delay
+   to any .line inside that doesn't already carry an explicit inline delay) */
+function staggerLines(container, baseDelay=0, gap=550){
+  const lines = $$('.line', container).filter(l => !l.classList.contains('reveal-in'));
+  lines.forEach((l, i) => {
+    l.style.animationDelay = (baseDelay + i*gap) + 'ms';
+    l.classList.add('reveal-in');
+  });
+}
+
+/* ================================================================
+   PARTICLES (hearts / stars / sparkles) — reusable emitter
+================================================================= */
+const PARTICLE_GLYPHS = { heart:'♥', star:'✦', sparkle:'✧', flower:'❀' };
+
+function spawnParticles(layerId, count=18, opts={}){
+  const layer = document.getElementById(layerId);
+  if(!layer) return;
+  const glyphs = opts.glyphs || ['heart','star','sparkle','flower'];
+  for(let i=0;i<count;i++){
+    const el = document.createElement('span');
+    const glyphKey = glyphs[Math.floor(Math.random()*glyphs.length)];
+    el.className = 'particle';
+    el.textContent = PARTICLE_GLYPHS[glyphKey];
+    const size = 12 + Math.random()*20;
+    el.style.left = (Math.random()*100) + '%';
+    el.style.fontSize = size + 'px';
+    el.style.color = ['#E8A0BF','#D9A94E','#B9A6D9','#F6C9AE'][Math.floor(Math.random()*4)];
+    el.style.setProperty('--drift', (Math.random()*140-70)+'px');
+    const dur = 6 + Math.random()*6;
+    el.style.animationDuration = dur+'s';
+    el.style.animationDelay = (Math.random()*(opts.spread||3))+'s';
+    layer.appendChild(el);
+    setTimeout(()=> el.remove(), (dur + (opts.spread||3))*1000 + 500);
+  }
+}
+
+/* continuous gentle ambient particles on a given layer */
+const ambientIntervals = {};
+function ambientLoop(layerId, everyMs=1400, count=1){
+  if(ambientIntervals[layerId]) clearInterval(ambientIntervals[layerId]);
+  spawnParticles(layerId, count, {spread:0.4});
+  ambientIntervals[layerId] = setInterval(()=> spawnParticles(layerId, count, {spread:0.4}), everyMs);
+  return ambientIntervals[layerId];
+}
+function clearAllAmbientLoops(){
+  Object.values(ambientIntervals).forEach(id => clearInterval(id));
+}
+
+/* ================================================================
+   MUSIC TOGGLE
+================================================================= */
+const bgMusic = $('#bgMusic');
+const musicBtn = $('#musicToggle');
+let musicRevealed = false;
+let musicPlaying = false;
+let musicTrackReady = false;
+
+// Probe once, quietly, whether music/birthday.mp3 actually exists.
+// If it 404s or the browser refuses, the button just never appears —
+// the rest of the site is unaffected either way.
+bgMusic.addEventListener('canplaythrough', () => { musicTrackReady = true; }, {once:true});
+bgMusic.addEventListener('loadedmetadata', () => { musicTrackReady = true; }, {once:true});
+bgMusic.addEventListener('error', () => { musicTrackReady = false; }, {once:true});
+bgMusic.load();
+
+function revealMusicButton(){
+  if(musicRevealed) return;
+  musicRevealed = true;
+  setTimeout(() => {
+    if(musicTrackReady) musicBtn.classList.add('show');
+  }, 300);
+}
+
+musicBtn.addEventListener('click', () => {
+  if(musicPlaying){
+    bgMusic.pause();
+    musicPlaying = false;
+    musicBtn.classList.remove('playing');
+  } else {
+    bgMusic.play().catch(()=>{});
+    musicPlaying = true;
+    musicBtn.classList.add('playing');
+  }
+});
+
+/* ================================================================
+   TWINKLE STAR FIELD — reused behind scene 1 / 3 / 4 / 6
+================================================================= */
+function buildTwinkleField(layerId, count=40){
+  const layer = document.getElementById(layerId);
+  if(!layer || layer.dataset.built) return;
+  layer.dataset.built = '1';
+  let html = '';
+  for(let i=0;i<count;i++){
+    const size = 1 + Math.random()*2;
+    html += `<span class="twinkle" style="left:${Math.random()*100}%; top:${Math.random()*100}%; width:${size}px; height:${size}px; animation-duration:${1.8+Math.random()*2.6}s; animation-delay:${Math.random()*2}s;"></span>`;
+  }
+  layer.innerHTML = html;
+}
+
+/* ================================================================
+   SCENE 1 — WELCOME
+================================================================= */
+function initScene1(){
+  buildTwinkleField('tw1', 50);
+  staggerLines($('#scene1'), 200, 650);
+  const btn = $('#s1btn');
+  btn.style.animationDelay = (200 + 5*650) + 'ms';
+  btn.classList.add('reveal-in');
+  ambientLoop('p1', 1800, 1);
+
+  btn.addEventListener('click', () => {
+    revealMusicButton();
+    spawnParticles('p1', 40, {spread:1.2, glyphs:['heart','sparkle']});
+    document.body.style.transition = 'opacity .4s ease';
+    document.body.style.opacity = '0.001';
+    setTimeout(() => {
+      document.body.style.opacity = '1';
+      goToScene('scene2');
+    }, 420);
+  }, {once:true});
+}
+
+/* ================================================================
+   SCENE 2 — MINI GAME
+================================================================= */
+let gameCaught = 0;
+const GAME_TARGET = 5;
+let gameActive = false;
+
+function initScene2(){
+  gameCaught = 0;
+  gameActive = true;
+  $('#gameCounter').textContent = `0 / ${GAME_TARGET}`;
+  $('#s2unlock').classList.add('hidden');
+  $('#gameField').innerHTML = '';
+  ambientLoop('p2', 2200, 1);
+  spawnHeart();
+}
+
+function spawnHeart(){
+  if(!gameActive) return;
+  const field = $('#gameField');
+  const btn = document.createElement('button');
+  btn.className = 'catchable tap-target';
+  const glyphs = ['💗','⭐','✨'];
+  btn.textContent = glyphs[Math.floor(Math.random()*glyphs.length)];
+  btn.setAttribute('aria-label','Catch');
+  const fw = field.clientWidth || 300;
+  const fh = field.clientHeight || 340;
+  const x = Math.random()*(fw-60);
+  const y = Math.random()*(fh-60);
+  btn.style.left = x+'px';
+  btn.style.top = y+'px';
+  btn.style.animationDelay = (Math.random()*1)+'s';
+
+  const catchIt = (e) => {
+    if(!gameActive) return;
+    e.preventDefault();
+    popEffect(field, x+24, y+24);
+    btn.remove();
+    gameCaught++;
+    $('#gameCounter').textContent = `${gameCaught} / ${GAME_TARGET}`;
+    if(gameCaught >= GAME_TARGET){
+      gameActive = false;
+      $('#s2unlock').classList.remove('hidden');
+    } else {
+      spawnHeart();
+    }
+  };
+  btn.addEventListener('click', catchIt);
+  field.appendChild(btn);
+}
+
+function popEffect(container, x, y){
+  for(let i=0;i<6;i++){
+    const p = document.createElement('span');
+    p.className = 'pop-particle';
+    p.textContent = ['✧','♥','·'][i%3];
+    p.style.left = x+'px';
+    p.style.top = y+'px';
+    const angle = Math.random()*Math.PI*2;
+    const dist = 30 + Math.random()*30;
+    p.style.setProperty('--px', Math.cos(angle)*dist+'px');
+    p.style.setProperty('--py', Math.sin(angle)*dist+'px');
+    container.appendChild(p);
+    setTimeout(()=>p.remove(), 750);
+  }
+}
+
+$('#s2btn').addEventListener('click', () => {
+  goToScene('scene3');
+});
+
+/* ================================================================
+   SCENE 3 — CAKE + BLOW DETECTION
+================================================================= */
+let audioCtx, analyser, micStream, micRafId;
+let candleOut = false;
+
+function initScene3(){
+  buildTwinkleField('tw3', 34);
+  candleOut = false;
+  const flame = $('#flame');
+  flame.className = 'flame';
+  flame.style.opacity = '1';
+  $('#wickEl') && $('#wickEl').classList.remove('charred');
+  $('#candle').querySelectorAll('.ember, .smoke').forEach(el => el.remove());
+  $('#micFill').style.width = '0%';
+  $('#micInstruction').textContent = 'Allow microphone access and blow toward the candle.';
+  ambientLoop('p3', 2400, 1);
+  setupMic();
+}
+
+function setupMic(){
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    $('#micInstruction').textContent = 'Microphone not available on this device — use the button below.';
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({ audio:true })
+    .then(stream => {
+      micStream = stream;
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioCtx.createMediaStreamSource(stream);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 512;
+      source.connect(analyser);
+      monitorBlow();
+    })
+    .catch(() => {
+      $('#micInstruction').textContent = 'Microphone access denied — no worries, tap the button below instead.';
+    });
+}
+
+function monitorBlow(){
+  if(candleOut || !analyser) return;
+  const data = new Uint8Array(analyser.frequencyBinCount);
+  analyser.getByteFrequencyData(data);
+  // Blowing produces sustained low-frequency energy; average the lower band.
+  const lowBand = data.slice(0, 40);
+  const avg = lowBand.reduce((a,b)=>a+b,0) / lowBand.length;
+  const level = Math.min(100, Math.round((avg/140)*100));
+  $('#micFill').style.width = level + '%';
+
+  if(avg > 55){
+    extinguishCandle();
+    return;
+  }
+  micRafId = requestAnimationFrame(monitorBlow);
+}
+
+function extinguishCandle(){
+  if(candleOut) return;
+  candleOut = true;
+  if(micRafId) cancelAnimationFrame(micRafId);
+  if(micStream) micStream.getTracks().forEach(t=>t.stop());
+  if(audioCtx) audioCtx.close().catch(()=>{});
+
+  const flame = $('#flame');
+  const candle = $('#candle');
+  const wick = $('#wickEl');
+
+  // STEP 1 — flame flares up and flickers rapidly, as if caught by breath
+  flame.className = 'flame blow-start';
+
+  setTimeout(() => {
+    // STEP 2 — flame bends hard sideways
+    flame.className = 'flame blow-bend';
+  }, 260);
+
+  setTimeout(() => {
+    // STEP 3 + 4 — flame shrinks, then fully disappears
+    flame.className = 'flame blow-out';
+  }, 760);
+
+  setTimeout(() => {
+    // STEP 5 — a small glowing ember lingers on the wick, then fades
+    flame.style.opacity = '0';
+    const ember = document.createElement('span');
+    ember.className = 'ember';
+    candle.appendChild(ember);
+    setTimeout(() => ember.remove(), 1200);
+  }, 1360);
+
+  setTimeout(() => {
+    // STEP 6 — smoke visibly rises from the wick; wick goes charred/dark
+    wick && wick.classList.add('charred');
+    for(let i=0;i<5;i++){
+      const s = document.createElement('span');
+      s.className = 'smoke';
+      s.style.setProperty('--sx', (Math.random()*30-15)+'px');
+      s.style.animationDelay = (i*0.18)+'s';
+      candle.appendChild(s);
+      setTimeout(()=>s.remove(), 2500);
+    }
+  }, 1500);
+
+  // STEP 7 — candle stays visibly on screen, flame off, for a beat before
+  // the countdown begins (never hide the candle itself).
+  setTimeout(() => {
+    goToScene('scene4');
+  }, 3400);
+}
+
+$('#fallbackBlow').addEventListener('click', extinguishCandle);
+
+/* ================================================================
+   SCENE 4 — REVEAL (countdown → confetti/fireworks/balloons)
+================================================================= */
+function initScene4(){
+  $('#countdownWrap').classList.remove('hidden');
+  $('#revealWrap').classList.add('hidden');
+  const numEl = $('#countdownNum');
+  let n = 3;
+  numEl.textContent = n;
+  numEl.classList.remove('reveal-in'); void numEl.offsetWidth; numEl.classList.add('reveal-in');
+
+  const tick = setInterval(() => {
+    n--;
+    if(n <= 0){
+      clearInterval(tick);
+      $('#countdownWrap').classList.add('hidden');
+      $('#revealWrap').classList.remove('hidden');
+      triggerBigReveal();
+      return;
+    }
+    numEl.textContent = n;
+    numEl.classList.remove('reveal-in'); void numEl.offsetWidth; numEl.classList.add('reveal-in');
+  }, 900);
+}
+
+function triggerBigReveal(){
+  launchConfetti(90);
+  launchBalloons(10);
+  launchFireworks(6);
+  ambientLoop('p4', 1200, 2);
+}
+
+function launchConfetti(count){
+  const layer = $('#p4');
+  const colors = ['#E8A0BF','#D9A94E','#B9A6D9','#F6C9AE','#FBF3EA'];
+  for(let i=0;i<count;i++){
+    const c = document.createElement('div');
+    c.className = 'confetti-piece';
+    c.style.left = Math.random()*100+'%';
+    c.style.background = colors[Math.floor(Math.random()*colors.length)];
+    c.style.borderRadius = Math.random()>.5 ? '50%' : '2px';
+    c.style.animationDuration = (2.6+Math.random()*2)+'s';
+    c.style.animationDelay = (Math.random()*1.2)+'s';
+    layer.appendChild(c);
+    setTimeout(()=>c.remove(), 6000);
+  }
+}
+
+function launchBalloons(count){
+  const layer = $('#p4');
+  const colors = ['#E8A0BF','#B9A6D9','#F6C9AE','#D9A94E'];
+  for(let i=0;i<count;i++){
+    const b = document.createElement('div');
+    b.className = 'balloon';
+    b.style.left = (5+Math.random()*90)+'%';
+    b.style.background = `radial-gradient(circle at 32% 28%, rgba(255,255,255,.55), ${colors[i%colors.length]} 60%)`;
+    b.style.setProperty('--sway', (Math.random()*80-40)+'px');
+    b.style.animationDuration = (7+Math.random()*4)+'s';
+    b.style.animationDelay = (Math.random()*1.5)+'s';
+    layer.appendChild(b);
+    setTimeout(()=>b.remove(), 13000);
+  }
+}
+
+function launchFireworks(count){
+  const layer = $('#p4');
+  const colors = ['#E8A0BF','#D9A94E','#B9A6D9','#F6C9AE'];
+  for(let i=0;i<count;i++){
+    setTimeout(() => {
+      const f = document.createElement('div');
+      f.className = 'firework';
+      f.style.left = (15+Math.random()*70)+'%';
+      f.style.top = (15+Math.random()*35)+'%';
+      f.style.color = colors[Math.floor(Math.random()*colors.length)];
+      layer.appendChild(f);
+      setTimeout(()=>f.remove(), 1500);
+    }, i*450);
+  }
+}
+
+$('#s4btn').addEventListener('click', () => goToScene('scene5'));
+
+/* ================================================================
+   SCENE 5 — QUOTE CARDS
+================================================================= */
+/* ===== EDIT / ADD WISHES HERE ===== */
+const QUOTES = [
+  "Hope your 20 is filled with the kind of happiness that arrives unexpectedly.",
+  "Hope you laugh until your stomach hurts.",
+  "Hope you meet people who make life lighter, not harder.",
+  "Hope you become the version of yourself you've always wanted to meet.",
+  "Hope you take chances that become your favourite memories.",
+  "Hope this year gives you more reasons to smile than reasons to worry.",
+  "Hope you never forget how loved you are.",
+  "Hope Chapter 20 becomes one of those chapters you never want to finish."
+];
+let quoteIndex = 0;
+let quoteTimer = null;
+
+function initScene5(){
+  quoteIndex = 0;
+  const stage = $('#quoteStage');
+  const dots = $('#quoteDots');
+  stage.innerHTML = QUOTES.map((q,i)=>`<div class="quote-card${i===0?' active':''}">&ldquo;${q}&rdquo;</div>`).join('');
+  dots.innerHTML = QUOTES.map((_,i)=>`<span class="${i===0?'active':''}"></span>`).join('');
+  clearInterval(quoteTimer);
+  quoteTimer = setInterval(nextQuote, 3200);
+}
+
+function nextQuote(){
+  const cards = $$('.quote-card', $('#quoteStage'));
+  const dots = $$('.quote-dots span', $('#scene5'));
+  cards[quoteIndex].classList.remove('active');
+  dots[quoteIndex].classList.remove('active');
+  quoteIndex = (quoteIndex + 1) % QUOTES.length;
+  cards[quoteIndex].classList.add('active');
+  dots[quoteIndex].classList.add('active');
+}
+
+$('#s5btn').addEventListener('click', () => {
+  clearInterval(quoteTimer);
+  goToScene('scene6');
+});
+
+/* ================================================================
+   SCENE 6 — MEMORIES (hanging polaroid scrapbook)
+================================================================= */
+/* ===== EDIT VARSHINI'S PHOTOS HERE =====
+   Put your images in a "photos" folder next to this index.html
+   (see the notes at the end of the reply for the exact folder layout),
+   then update the file names and captions below. Any entry whose image
+   fails to load automatically falls back to a soft placeholder card,
+   so the page never breaks even before you've added real photos. */
+const MEMORIES = [
+  { image: "photos/varshini1.jpg", caption: "That one random day..." },
+  { image: "photos/varshini2.jpg", caption: "A memory worth keeping." },
+  { image: "photos/varshini3.jpg", caption: "The stupid jokes that only we find funny." },
+  { image: "photos/memory1.jpg",   caption: "Doing absolutely nothing, memorably." },
+  { image: "photos/memory2.jpg",   caption: "Laughing when we were supposed to be serious." },
+  { image: "photos/memory3.jpg",   caption: "One of my favourites." }
+];
+/* ===== END MEMORIES ===== */
+
+function initScene6(){
+  ambientLoop('p6', 2600, 1);
+  buildTwinkleField('tw6', 30);
+  const grid = $('#polaroidGrid');
+  grid.innerHTML = MEMORIES.map((m,i) => {
+    const rot = (i % 2 === 0 ? -1 : 1) * (3 + Math.random()*5);
+    const fdelay = (Math.random()*2).toFixed(2);
+    return `
+      <div class="polaroid" style="--rot:${rot.toFixed(1)}deg; --fdelay:${fdelay}s;" data-i="${i}">
+        <span class="clip"></span>
+        <img class="photo" src="${m.image}" alt="${m.caption}"
+             onerror="this.onerror=null; this.classList.add('placeholder'); this.removeAttribute('src'); this.textContent='photo coming soon';">
+        <span class="cap">${m.caption}</span>
+      </div>`;
+  }).join('');
+
+  $$('.polaroid', grid).forEach((card, i) => {
+    setTimeout(()=> card.classList.add('in'), 300 + i*180);
+    card.addEventListener('click', () => openLightbox(MEMORIES[i]));
+  });
+}
+
+function openLightbox(mem){
+  const lb = $('#lightbox');
+  const img = $('#lbImg');
+  img.onerror = () => { img.style.display='none'; };
+  img.onload = () => { img.style.display='block'; };
+  img.src = mem.image;
+  $('#lbCap').textContent = mem.caption;
+  lb.classList.add('show');
+}
+$('#lbClose').addEventListener('click', () => $('#lightbox').classList.remove('show'));
+$('#lightbox').addEventListener('click', (e) => { if(e.target.id === 'lightbox') $('#lightbox').classList.remove('show'); });
+
+$('#s6btn').addEventListener('click', () => goToScene('scene7'));
+
+/* ================================================================
+   SCENE 7 — QUIZ (light, general, fun — nothing about "who knows who")
+================================================================= */
+/* ===== EDIT QUIZ QUESTIONS HERE =====
+   Add or edit entries freely — three random ones are picked each time
+   the page is opened or replayed, so it can feel a little different
+   every time she plays. */
+const QUIZ_POOL = [
+  { q: "If you could instantly travel anywhere right now, what would you choose?", options: ["Beach", "Mountains", "Big city", "Somewhere completely random"] },
+  { q: "Which superpower would you choose?", options: ["Flying", "Teleportation", "Reading minds", "Time travel"] },
+  { q: "Pick your perfect lazy-day plan.", options: ["Movies all day", "Sleep forever", "Food + music", "Go somewhere randomly"] },
+  { q: "Which would you choose?", options: ["Unlimited money", "Unlimited travel", "Unlimited food", "Unlimited free time"] },
+  { q: "Pick a birthday vibe.", options: ["Party", "Beach", "Cozy night", "Adventure"] }
+];
+let QUIZ = [];
+let quizIndex = 0;
+
+function pickQuizQuestions(){
+  const shuffled = [...QUIZ_POOL].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, 3);
+}
+
+function initScene7(){
+  QUIZ = pickQuizQuestions();
+  quizIndex = 0;
+  renderQuizProgress();
+  renderQuizQuestion();
+}
+
+function renderQuizProgress(){
+  $('#quizProgress').innerHTML = QUIZ.map((_,i)=>`<i class="${i<quizIndex?'done':''}"></i>`).join('');
+}
+
+function renderQuizQuestion(){
+  const body = $('#quizBody');
+  if(quizIndex >= QUIZ.length){
+    body.innerHTML = `
+      <p class="line script reveal-in" style="font-size:1.6rem;">Okayyy&hellip; I'll allow it.</p>
+      <p class="line reveal-in" style="animation-delay:.25s; font-weight:600;">You've unlocked the final message.</p>
+      <button class="btn gold reveal-in" id="s7btn" style="animation-delay:.5s; margin-top:14px;">Open the Final Message →</button>
+    `;
+    $('#s7btn').addEventListener('click', () => goToScene('scene8'));
+    return;
+  }
+  const item = QUIZ[quizIndex];
+  body.innerHTML = `
+    <p class="quiz-q">${item.q}</p>
+    <div class="quiz-options">
+      ${item.options.map((opt,i)=>`<button class="quiz-opt" data-i="${i}">${opt}</button>`).join('')}
+    </div>
+  `;
+  $$('.quiz-opt', body).forEach(btn => {
+    btn.addEventListener('click', () => {
+      $$('.quiz-opt', body).forEach(b=>b.classList.remove('chosen'));
+      btn.classList.add('chosen');
+      setTimeout(() => {
+        quizIndex++;
+        renderQuizProgress();
+        renderQuizQuestion();
+      }, 450);
+    });
+  });
+}
+
+/* ================================================================
+   SCENE 8 — FINAL LETTER
+================================================================= */
+$('#s8btn').addEventListener('click', () => goToScene('scene9'));
+
+/* ================================================================
+   FINAL SCREEN
+================================================================= */
+function initScene9(){
+  // static night sky
+  const sky = $('#starsStatic');
+  if(!sky.dataset.built){
+    sky.dataset.built = '1';
+    let html = '';
+    for(let i=0;i<70;i++){
+      html += `<span class="star-dot" style="left:${Math.random()*100}%; top:${Math.random()*100}%; animation:eq ${2+Math.random()*3}s ease-in-out infinite;"></span>`;
+    }
+    sky.innerHTML = html;
+  }
+  ambientLoop('p9', 2600, 1);
+  launchFireworksSlow();
+}
+
+function launchFireworksSlow(){
+  const layer = $('#p9');
+  const colors = ['#E8A0BF','#D9A94E','#B9A6D9'];
+  let count = 0;
+  const iv = setInterval(() => {
+    if(count++ > 8 || $('#scene9').classList.contains('hidden')){ clearInterval(iv); return; }
+    const f = document.createElement('div');
+    f.className = 'firework';
+    f.style.left = (10+Math.random()*80)+'%';
+    f.style.top = (10+Math.random()*50)+'%';
+    f.style.color = colors[Math.floor(Math.random()*colors.length)];
+    layer.appendChild(f);
+    setTimeout(()=>f.remove(), 1600);
+  }, 1500);
+}
+
+$('#replayBtn').addEventListener('click', () => {
+  resetEverything();
+  goToScene('scene1');
+  setTimeout(() => {
+    // reset scene1 lines for replay
+    $$('#scene1 .line').forEach(l => { l.classList.remove('reveal-in'); l.style.opacity=0; });
+    initScene1();
+  }, 50);
+});
+
+/* Full reset — replay must restart the whole experience from zero:
+   heart counter, candle, flame, quiz, animations, countdown, scenes. */
+function resetEverything(){
+  // heart-catch game
+  gameCaught = 0;
+  gameActive = false;
+  $('#gameField').innerHTML = '';
+  $('#gameCounter').textContent = `0 / ${GAME_TARGET}`;
+  $('#s2unlock').classList.add('hidden');
+
+  // candle / mic
+  candleOut = false;
+  if(micRafId) cancelAnimationFrame(micRafId);
+  if(micStream) micStream.getTracks().forEach(t=>t.stop());
+  if(audioCtx) audioCtx.close().catch(()=>{});
+  micStream = null; audioCtx = null; analyser = null;
+  const flame = $('#flame');
+  flame.className = 'flame';
+  flame.style.opacity = '1';
+  $('#wickEl').classList.remove('charred');
+  $('#candle').querySelectorAll('.ember, .smoke').forEach(el => el.remove());
+  $('#micFill').style.width = '0%';
+
+  // reveal countdown
+  $('#countdownWrap').classList.remove('hidden');
+  $('#revealWrap').classList.add('hidden');
+
+  // quotes
+  clearInterval(quoteTimer);
+  quoteIndex = 0;
+
+  // memories gallery
+  $('#polaroidGrid').innerHTML = '';
+  $('#lightbox').classList.remove('show');
+
+  // quiz
+  quizIndex = 0;
+
+  // stop every ambient particle loop before scenes rebuild
+  clearAllAmbientLoops();
+
+  // clear every particle / twinkle layer so scenes rebuild fresh
+  ['p1','p2','p3','p4','p6','p9','tw1','tw3','tw4','tw6'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el){ el.innerHTML = ''; delete el.dataset.built; }
+  });
+  $('#starsStatic').innerHTML = '';
+  delete $('#starsStatic').dataset.built;
+
+  // remove any lingering full-screen overlays
+  $$('body > div[style*="position:fixed"]').forEach(el => {
+    if(el.id !== 'lightbox' && el.id !== 'spine') el.remove();
+  });
+}
+
+/* ================================================================
+   SCENE ENTER DISPATCH
+================================================================= */
+function runSceneEnter(id){
+  switch(id){
+    case 'scene2': initScene2(); break;
+    case 'scene3': initScene3(); break;
+    case 'scene4': initScene4(); break;
+    case 'scene5': initScene5(); break;
+    case 'scene6': initScene6(); break;
+    case 'scene7': initScene7(); break;
+    case 'scene9': initScene9(); break;
+  }
+}
+
+/* ================================================================
+   BOOT
+================================================================= */
+window.addEventListener('DOMContentLoaded', () => {
+  initScene1();
+});
+</script>
+</body>
+</html>
